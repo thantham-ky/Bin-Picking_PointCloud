@@ -68,5 +68,5 @@ pcd_vox_out_pln_des = o3d.pipelines.registration.compute_fpfh_feature(pcd_vox_ou
 
 # %% save
 
-o3d.io.write_point_cloud(pcd_file, pcd_vox_out_pln, write_ascii=True)
+o3d.io.write_point_cloud(pcd_file, pcd_vox_out_pln_slt, write_ascii=True)
 o3d.io.write_feature(des_file, pcd_vox_out_pln_des)

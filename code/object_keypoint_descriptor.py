@@ -1,7 +1,7 @@
 import open3d as o3d
 import pickle
 
-object_file = 'D:/PointCloud/Project/data/preprocessed/120_single_1.pcd'
+object_file = 'D:/PointCloud/Project/data/raw/offline/90_down_45.ply'
 
 object_db = 'D:/PointCloud/Project/data/database/120_single_1_pre_db'
 

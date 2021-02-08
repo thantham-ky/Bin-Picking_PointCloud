@@ -1,8 +1,8 @@
 import open3d as o3d
 
-ply_file = 'D:/PointCloud/Project/data/raw/120_single_1.ply'
+ply_file = 'D:/PointCloud/Project/data/raw/offline/90_down_45.ply'
 
-object_file = 'D:/PointCloud/Project/data/preprocessed/120_single_1.pcd'
+object_file = 'D:/PointCloud/Project/data/preprocessed/90_down_45_pre.ply'
 
 #%% Read point cloud
 ply = o3d.io.read_point_cloud(ply_file)

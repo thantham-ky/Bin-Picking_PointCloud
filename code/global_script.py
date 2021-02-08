@@ -3,9 +3,9 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 
-from sklearn.cluster import OPTICS, cluster_optics_dbscan
+from sklearn.cluster import OPTICS
 
-global_pcd_file = "D:/PointCloud/Project/data/raw/online/90_dou_1.ply"
+global_pcd_file = "D:/PointCloud/Project/data/raw/online/90_test_5_1.ply"
 
 db_pcd_file = "D:/PointCloud/Project/data/database/90_plane.pcd"
 db_des_file = "D:/PointCloud/Project/data/database/90_plane_des.des"
@@ -70,7 +70,7 @@ print("[PROCESS] OPTICS Clustering")
 
 object_np = np.asarray(object_cloud.points)
 
-cluster = OPTICS(min_samples=30, xi=.04, min_cluster_size=.04)
+cluster = OPTICS(min_samples=30, xi=.04, min_cluster_size=.05)
 
 cluster.fit(object_np)
 
@@ -146,7 +146,7 @@ for i in range(max_label+1):
     object_i = object_cloud.select_by_index(np.transpose(np.where(labels==i)))
 
     print("[INFO] Object processing: ", i)
-    # o3d.visualization.draw([object_i])
+    # o3d.visualization.draw([db_pcd])
 
 # %% Registration
 
