@@ -1,11 +1,15 @@
 import open3d as o3d
 import numpy as np
 
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import OPTICS, cluster_optics_dbscan
 
-raw_file = "D:/thantham/Project/data/raw/180_single_1.ply"
 
-pcd_file = "D:/thantham/Project/data/database/180_plane.pcd"
-des_file = "D:/thantham/Project/data/database/180_plane_des.des"
+raw_file = "D:/PointCloud/Project/data/raw/offline/90_plane.ply"
+
+pcd_file = "D:/PointCloud/Project/data/database/90_plane.pcd"
+des_file = "D:/PointCloud/Project/data/database/90_plane_des.des"
 
 # %% Read
 pcd = o3d.io.read_point_cloud(raw_file)
@@ -30,15 +34,36 @@ plane , inliers = pcd_vox_out.segment_plane(distance_threshold=0.01,
 
 pcd_vox_out_pln = pcd_vox_out.select_by_index(inliers, invert=True)
 
+# %% cluster
+
+object_np = np.asarray(pcd_vox_out_pln.points)
+
+cluster = OPTICS(min_samples=30, xi=.04, min_cluster_size=.04)
+
+cluster.fit(object_np)
+
+labels = cluster.labels_
+
+max_label = labels.max()
+
+colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
+colors[labels < 0] = 0
+pcd_vox_out_pln.colors = o3d.utility.Vector3dVector(colors[:, :3])
+
+pcd_vox_out_pln_slt = pcd_vox_out_pln.select_by_index(np.transpose(np.where(labels==4)))
+
+o3d.visualization.draw([pcd_vox_out_pln_slt])
+
+
 # %% compute fpfh
 
 radius_feature = voxel_size * 5
 
-pcd_vox_out_pln_des = o3d.pipelines.registration.compute_fpfh_feature(pcd_vox_out_pln, o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
+pcd_vox_out_pln_des = o3d.pipelines.registration.compute_fpfh_feature(pcd_vox_out_pln_slt, o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
 
 # %% visualize
 
-o3d.visualization.draw([pcd_vox_out_pln])
+# o3d.visualization.draw([pcd_vox_out_pln])
 
 
 # %% save

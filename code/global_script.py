@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 
 from sklearn.cluster import OPTICS, cluster_optics_dbscan
 
-global_pcd_file = "D:/thantham/Project/data/raw/online/90_dou_1.ply"
+global_pcd_file = "D:/PointCloud/Project/data/raw/online/90_dou_1.ply"
 
-db_pcd_file = "D:/thantham/Project/data/database/90_single_1_pre_db.pcd"
-db_des_file = "D:/thantham/Project/data/database/90_single_1_pre_db_des.des"
+db_pcd_file = "D:/PointCloud/Project/data/database/90_plane.pcd"
+db_des_file = "D:/PointCloud/Project/data/database/90_plane_des.des"
 
 # %% 1 Read pcd
 
@@ -66,7 +66,7 @@ plane_cloud = global_pcd_vox_plane.select_by_index(inliers)
 # print(f"[INFO] point cloud has {max_label + 1} clusters")
 
 
-
+print("[PROCESS] OPTICS Clustering")
 
 object_np = np.asarray(object_cloud.points)
 
@@ -84,9 +84,11 @@ object_cloud.colors = o3d.utility.Vector3dVector(colors[:, :3])
 
 o3d.visualization.draw([object_cloud])
 
+print("[INFO] ", max_label+1, " cluster found")
 
 # %%% define registration object
 
+print("[PROCESS] Read DB pcd")
 
 db_pcd = o3d.io.read_point_cloud(db_pcd_file)
 db_des = o3d.io.read_feature(db_des_file)
@@ -97,9 +99,9 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
     
     distance_threshol_regis = voxel_size * 1.6
     
-    print("\n:: RANSAC registration on downsampled point clouds.")
-    print("   Since the downsampling voxel size is %.3f," % voxel_size)
-    print("   we use a liberal distance threshold %.3f.\n" % distance_threshol_regis)
+    # print("\n:: RANSAC registration on downsampled point clouds.")
+    # print("   Since the downsampling voxel size is %.3f," % voxel_size)
+    # print("   we use a liberal distance threshold %.3f.\n" % distance_threshol_regis)
     
     regis_result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
         source_down, target_down, source_fpfh, target_fpfh, True,
@@ -113,9 +115,9 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
     print(regis_result,"\n\n")
     
     distance_threshold_refine = voxel_size * 0.4
-    print(":: Point-to-plane ICP registration is applied on original point")
-    print("   clouds to refine the alignment. This time we use a strict")
-    print("   distance threshold %.3f.\n" % distance_threshold_refine)
+    # print(":: Point-to-plane ICP registration is applied on original point")
+    # print("   clouds to refine the alignment. This time we use a strict")
+    # print("   distance threshold %.3f.\n" % distance_threshold_refine)
     refine_result = o3d.pipelines.registration.registration_icp(
         source_down, target_down, distance_threshold_refine, regis_result.transformation,
         o3d.pipelines.registration.TransformationEstimationPointToPlane())
@@ -129,6 +131,8 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
 
 
 # %% For each cluster
+
+print("[PROCESS] Registration for each cluster")
 
 object_list = []
 unobject_list = []
