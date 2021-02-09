@@ -7,8 +7,8 @@ from sklearn.cluster import OPTICS
 
 global_pcd_file = "D:/PointCloud/Project/data/raw/online/90_test_5_1.ply"
 
-db_pcd_file = "D:/PointCloud/Project/data/database/90_plane.pcd"
-db_des_file = "D:/PointCloud/Project/data/database/90_plane_des.des"
+db_pcd_file = "D:/PointCloud/Project/data/database/90_down_h_pre.pcd"
+db_des_file = "D:/PointCloud/Project/data/database/90_down_h_pre_des.des"
 
 # %% 1 Read pcd
 
@@ -57,7 +57,7 @@ plane_cloud = global_pcd_vox_plane.select_by_index(inliers)
 # with o3d.utility.VerbosityContextManager(
 #         o3d.utility.VerbosityLevel.Debug) as cm:
 #     labels = np.array(
-#        object_cloud.cluster_dbscan(eps=0.02, min_points=10, print_progress=True))
+#         object_cloud.cluster_dbscan(eps=0.02, min_points=10, print_progress=True))
 
 # max_label = labels.max()
 
@@ -82,7 +82,7 @@ colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
 colors[labels < 0] = 0
 object_cloud.colors = o3d.utility.Vector3dVector(colors[:, :3])
 
-o3d.visualization.draw([object_cloud])
+# o3d.visualization.draw([object_cloud])
 
 print("[INFO] ", max_label+1, " cluster found")
 
@@ -110,7 +110,7 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
         3, 
         [o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.9), 
          o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(distance_threshol_regis)], 
-        o3d.pipelines.registration.RANSACConvergenceCriteria(10000000, 0.9999))
+        o3d.pipelines.registration.RANSACConvergenceCriteria(10000000, 0.99))
     
     print(regis_result,"\n\n")
     
@@ -156,7 +156,7 @@ for i in range(max_label+1):
 
     radius_normal = voxel_size *2
 
-# object_i.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius = radius_normal, max_nn=30))
+    object_i.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius = radius_normal, max_nn=30))
 
     object_fpfh = o3d.pipelines.registration.compute_fpfh_feature(object_i, o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
 
