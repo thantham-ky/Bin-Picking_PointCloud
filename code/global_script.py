@@ -5,10 +5,21 @@ import matplotlib.pyplot as plt
 
 from sklearn.cluster import OPTICS
 
-global_pcd_file = "D:/PointCloud/Project/data/raw/online/90_test_5_1.ply"
+global_pcd_file = "D:/thantham/Project/Bin-Picking_PointCloud/data/raw/online/90_test_3.ply"
 
-db_pcd_file = "D:/PointCloud/Project/data/database/90_down_h_pre.pcd"
-db_des_file = "D:/PointCloud/Project/data/database/90_down_h_pre_des.des"
+db_path = "D:/thantham/Project/Bin-Picking_PointCloud/data/database/"
+
+db_model_list = ['90_plane_1_pre.pcd',
+                 '90_down_h_pre.pcd',
+                 '90_down_1_pre.pcd',
+                 '90_up_h_pre.pcd',
+                 '90_up_1_pre.pcd']
+
+db_des_list = ['90_plane_1_pre_des.des',
+               '90_down_h_pre_des.des',
+               '90_down_1_pre_des.des',
+               '90_up_h_pre_des.des',
+               '90_up_1_pre_des.des']
 
 # %% 1 Read pcd
 
@@ -88,10 +99,9 @@ print("[INFO] ", max_label+1, " cluster found")
 
 # %%% define registration object
 
-print("[PROCESS] Read DB pcd")
+# print("[PROCESS] Read DB pcd")
 
-db_pcd = o3d.io.read_point_cloud(db_pcd_file)
-db_des = o3d.io.read_feature(db_des_file)
+
 
 
 # %%% Matching and registration
@@ -108,9 +118,9 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
         distance_threshol_regis,
         o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
         3, 
-        [o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.9), 
+        [o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.95), 
          o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(distance_threshol_regis)], 
-        o3d.pipelines.registration.RANSACConvergenceCriteria(10000000, 0.99))
+        o3d.pipelines.registration.RANSACConvergenceCriteria(100000, 0.999))
     
     print(regis_result,"\n\n")
     
@@ -137,39 +147,44 @@ print("[PROCESS] Registration for each cluster")
 object_list = []
 unobject_list = []
 
-for i in range(max_label+1):
+for each_cluster in range(max_label+1):
     
 # limit at max labels
 
-    model_temp = copy.deepcopy(db_pcd)
-
-    object_i = object_cloud.select_by_index(np.transpose(np.where(labels==i)))
-
-    print("[INFO] Object processing: ", i)
-    # o3d.visualization.draw([db_pcd])
-
-# %% Registration
-
-# %%% compute fpfh
-
-    radius_feature = voxel_size * 5
-
-    radius_normal = voxel_size *2
-
-    object_i.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius = radius_normal, max_nn=30))
-
-    object_fpfh = o3d.pipelines.registration.compute_fpfh_feature(object_i, o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
-
-    regis_result = execute_global_registration_refine(db_pcd, object_i, db_des, object_fpfh ,voxel_size)
-
-
-    print("\nRegistration transformation: \n", regis_result.transformation)
-    
-    if regis_result.fitness >= 0.2:
+    for each_model_db in range(len(db_des_list)):
         
-        object_list.append(model_temp.transform(regis_result.transformation))
-    else:
-        unobject_list.append(model_temp.transform(regis_result.transformation))
+        db_pcd = o3d.io.read_point_cloud(db_path + db_model_list[each_model_db])
+        db_des = o3d.io.read_feature(db_path + db_des_list[each_model_db])
+
+        model_temp = copy.deepcopy(db_pcd)
+    
+        object_i = object_cloud.select_by_index(np.transpose(np.where(labels==each_cluster)))
+    
+        print("[INFO] Object processing: ", each_cluster)
+        # o3d.visualization.draw([db_pcd])
+    
+    # %% Registration
+    
+    # %%% compute fpfh
+    
+        radius_feature = voxel_size * 5
+    
+        radius_normal = voxel_size *2
+    
+        object_i.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius = radius_normal, max_nn=30))
+    
+        object_fpfh = o3d.pipelines.registration.compute_fpfh_feature(object_i, o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
+    
+        regis_result = execute_global_registration_refine(db_pcd, object_i, db_des, object_fpfh ,voxel_size)
+    
+    
+        print("\nRegistration transformation: \n", regis_result.transformation)
+        
+        if regis_result.fitness >= 0.15:
+            
+            object_list.append(model_temp.transform(regis_result.transformation))
+        else:
+            unobject_list.append(model_temp.transform(regis_result.transformation))
 
 print("[RESULT] ", len(object_list), " objects were recognized from ", max_label+1)
 
@@ -182,7 +197,7 @@ for unobject_i in unobject_list:
     
 plane_cloud.paint_uniform_color([0.9,0.9,0.9])
 
-o3d.visualization.draw([plane_cloud]+object_list+[object_cloud]+unobject_list)
+o3d.visualization.draw([plane_cloud]+object_list+[object_cloud])
 
 # fitness_threshold = 0.3
 
