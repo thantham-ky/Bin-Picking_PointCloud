@@ -5,21 +5,25 @@ import matplotlib.pyplot as plt
 
 from sklearn.cluster import OPTICS
 
-global_pcd_file = "D:/thantham/Project/Bin-Picking_PointCloud/data/raw/online/90_test_3.ply"
+global_pcd_file = "D:/PointCloud/Project/data/raw/online/180_fo_1.ply"
 
-db_path = "D:/thantham/Project/Bin-Picking_PointCloud/data/database/"
+db_path = "D:/PointCloud/Project/data/database/"
 
-db_model_list = ['90_plane_1_pre.pcd',
-                 '90_down_h_pre.pcd',
-                 '90_down_1_pre.pcd',
-                 '90_up_h_pre.pcd',
-                 '90_up_1_pre.pcd']
+# db_model_list = ['90_plane_1_pre.pcd',
+#                  '90_down_h_pre.pcd',
+#                  '90_down_1_pre.pcd',
+#                  '90_up_h_pre.pcd',
+#                  '90_up_1_pre.pcd']
 
-db_des_list = ['90_plane_1_pre_des.des',
-               '90_down_h_pre_des.des',
-               '90_down_1_pre_des.des',
-               '90_up_h_pre_des.des',
-               '90_up_1_pre_des.des']
+# db_des_list = ['90_plane_1_pre_des.des',
+#                '90_down_h_pre_des.des',
+#                '90_down_1_pre_des.des',
+#                '90_up_h_pre_des.des',
+#                '90_up_1_pre_des.des']
+
+db_model_list = ['180_cad_plane_rsc.pcd']
+
+db_des_list = ['180_cad_plane_rsc_des.des']
 
 # %% 1 Read pcd
 
@@ -65,33 +69,33 @@ plane_cloud = global_pcd_vox_plane.select_by_index(inliers)
 
 # %% Clustering
 
-# with o3d.utility.VerbosityContextManager(
-#         o3d.utility.VerbosityLevel.Debug) as cm:
-#     labels = np.array(
-#         object_cloud.cluster_dbscan(eps=0.02, min_points=10, print_progress=True))
-
-# max_label = labels.max()
-
-# print("[PROCESS] Point Cloud Clustering by DBSCAN")
-
-# print(f"[INFO] point cloud has {max_label + 1} clusters")
-
-
-print("[PROCESS] OPTICS Clustering")
-
-object_np = np.asarray(object_cloud.points)
-
-cluster = OPTICS(min_samples=30, xi=.04, min_cluster_size=.05)
-
-cluster.fit(object_np)
-
-labels = cluster.labels_
+with o3d.utility.VerbosityContextManager(
+        o3d.utility.VerbosityLevel.Debug) as cm:
+    labels = np.array(
+        object_cloud.cluster_dbscan(eps=0.02, min_points=10, print_progress=True))
 
 max_label = labels.max()
 
-colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
-colors[labels < 0] = 0
-object_cloud.colors = o3d.utility.Vector3dVector(colors[:, :3])
+print("[PROCESS] Point Cloud Clustering by DBSCAN")
+
+print(f"[INFO] point cloud has {max_label + 1} clusters")
+
+
+# print("[PROCESS] OPTICS Clustering")
+
+# object_np = np.asarray(object_cloud.points)
+
+# cluster = OPTICS(min_samples=30, xi=.04, min_cluster_size=.05)
+
+# cluster.fit(object_np)
+
+# labels = cluster.labels_
+
+# max_label = labels.max()
+
+# colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
+# colors[labels < 0] = 0
+# object_cloud.colors = o3d.utility.Vector3dVector(colors[:, :3])
 
 # o3d.visualization.draw([object_cloud])
 
@@ -107,8 +111,7 @@ print("[INFO] ", max_label+1, " cluster found")
 # %%% Matching and registration
 def execute_global_registration_refine(source_down, target_down, source_fpfh, target_fpfh, voxel_size):
     
-    distance_threshol_regis = voxel_size * 1.6
-    
+    distance_threshol_regis = voxel_size * 2.0
     # print("\n:: RANSAC registration on downsampled point clouds.")
     # print("   Since the downsampling voxel size is %.3f," % voxel_size)
     # print("   we use a liberal distance threshold %.3f.\n" % distance_threshol_regis)
@@ -117,10 +120,10 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
         source_down, target_down, source_fpfh, target_fpfh, True,
         distance_threshol_regis,
         o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
-        3, 
-        [o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.95), 
-         o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(distance_threshol_regis)], 
-        o3d.pipelines.registration.RANSACConvergenceCriteria(100000, 0.999))
+        5, 
+        [o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.5), 
+          o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(distance_threshol_regis)], 
+        o3d.pipelines.registration.RANSACConvergenceCriteria(1000000000, 0.999))
     
     print(regis_result,"\n\n")
     
@@ -197,7 +200,7 @@ for unobject_i in unobject_list:
     
 plane_cloud.paint_uniform_color([0.9,0.9,0.9])
 
-o3d.visualization.draw([plane_cloud]+object_list+[object_cloud])
+o3d.visualization.draw([plane_cloud]+object_list+[object_cloud]+unobject_list)
 
 # fitness_threshold = 0.3
 

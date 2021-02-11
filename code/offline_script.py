@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import OPTICS, cluster_optics_dbscan
 
 
-raw_file = "D:/PointCloud/Project/data/raw/offline/90_down_h_pre.ply"
+raw_file = "D:/PointCloud/Project/data/raw/offline/180_cad_plane_rsc.pcd"
 
-pcd_file = "D:/PointCloud/Project/data/database/90_down_h_pre.pcd"
-des_file = "D:/PointCloud/Project/data/database/90_down_h_pre_des.des"
+pcd_file = "D:/PointCloud/Project/data/database/180_cad_plane_rsc.pcd"
+des_file = "D:/PointCloud/Project/data/database/180_cad_plane_rsc_des.des"
 
 # %% Read
 pcd = o3d.io.read_point_cloud(raw_file)
