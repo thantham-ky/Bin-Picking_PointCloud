@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.cluster import OPTICS
 
-global_pcd_file = "D:/PointCloud/Project/data/raw/online/180_fo_1.ply"
+global_pcd_file = "D:/PointCloud/Project/data/raw/online/180_real_7_pre.ply"
 
 db_path = "D:/PointCloud/Project/data/database/"
 
@@ -69,16 +69,16 @@ plane_cloud = global_pcd_vox_plane.select_by_index(inliers)
 
 # %% Clustering
 
-with o3d.utility.VerbosityContextManager(
-        o3d.utility.VerbosityLevel.Debug) as cm:
-    labels = np.array(
-        object_cloud.cluster_dbscan(eps=0.02, min_points=10, print_progress=True))
+# with o3d.utility.VerbosityContextManager(
+#         o3d.utility.VerbosityLevel.Debug) as cm:
+#     labels = np.array(
+#         object_cloud.cluster_dbscan(eps=0.02, min_points=10, print_progress=True))
 
-max_label = labels.max()
+# max_label = labels.max()
 
-print("[PROCESS] Point Cloud Clustering by DBSCAN")
+# print("[PROCESS] Point Cloud Clustering by DBSCAN")
 
-print(f"[INFO] point cloud has {max_label + 1} clusters")
+# print(f"[INFO] point cloud has {max_label + 1} clusters")
 
 
 # print("[PROCESS] OPTICS Clustering")
@@ -97,9 +97,13 @@ print(f"[INFO] point cloud has {max_label + 1} clusters")
 # colors[labels < 0] = 0
 # object_cloud.colors = o3d.utility.Vector3dVector(colors[:, :3])
 
-# o3d.visualization.draw([object_cloud])
+# # o3d.visualization.draw([object_cloud])
 
-print("[INFO] ", max_label+1, " cluster found")
+# print("[INFO] ", max_label+1, " cluster found")
+
+# CASE NO CLUSTERING
+
+max_label = 0
 
 # %%% define registration object
 
@@ -111,7 +115,7 @@ print("[INFO] ", max_label+1, " cluster found")
 # %%% Matching and registration
 def execute_global_registration_refine(source_down, target_down, source_fpfh, target_fpfh, voxel_size):
     
-    distance_threshol_regis = voxel_size * 2.0
+    distance_threshol_regis = voxel_size * 1.5
     # print("\n:: RANSAC registration on downsampled point clouds.")
     # print("   Since the downsampling voxel size is %.3f," % voxel_size)
     # print("   we use a liberal distance threshold %.3f.\n" % distance_threshol_regis)
@@ -119,15 +123,16 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
     regis_result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
         source_down, target_down, source_fpfh, target_fpfh, True,
         distance_threshol_regis,
-        o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
-        5, 
-        [o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.5), 
-          o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(distance_threshol_regis)], 
-        o3d.pipelines.registration.RANSACConvergenceCriteria(1000000000, 0.999))
+        o3d.pipelines.registration.TransformationEstimationPointToPoint(),
+        3, 
+        [o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.9), 
+          o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(distance_threshol_regis)],
+          # o3d.pipelines.registration.CorrespondenceCheckerBasedOnNormal(0.1)], 
+        o3d.pipelines.registration.RANSACConvergenceCriteria(10000000, 0.999))
     
     print(regis_result,"\n\n")
     
-    distance_threshold_refine = voxel_size * 0.4
+    distance_threshold_refine = voxel_size * 0.5
     # print(":: Point-to-plane ICP registration is applied on original point")
     # print("   clouds to refine the alignment. This time we use a strict")
     # print("   distance threshold %.3f.\n" % distance_threshold_refine)
@@ -156,13 +161,17 @@ for each_cluster in range(max_label+1):
 
     for each_model_db in range(len(db_des_list)):
         
-        db_pcd = o3d.io.read_point_cloud(db_path + db_model_list[each_model_db])
-        db_des = o3d.io.read_feature(db_path + db_des_list[each_model_db])
+        # db_pcd = o3d.io.read_point_cloud(db_path + db_model_list[each_model_db])
+        # db_des = o3d.io.read_feature(db_path + db_des_list[each_model_db])
+        db_pcd = o3d.io.read_point_cloud(db_path + db_model_list[0])
+        db_des = o3d.io.read_feature(db_path + db_des_list[0])
 
         model_temp = copy.deepcopy(db_pcd)
     
-        object_i = object_cloud.select_by_index(np.transpose(np.where(labels==each_cluster)))
+        # object_i = object_cloud.select_by_index(np.transpose(np.where(labels==each_cluster)))
     
+        object_i = copy.deepcopy(object_cloud)
+        
         print("[INFO] Object processing: ", each_cluster)
         # o3d.visualization.draw([db_pcd])
     
@@ -186,8 +195,11 @@ for each_cluster in range(max_label+1):
         if regis_result.fitness >= 0.15:
             
             object_list.append(model_temp.transform(regis_result.transformation))
+            
         else:
             unobject_list.append(model_temp.transform(regis_result.transformation))
+            
+        break
 
 print("[RESULT] ", len(object_list), " objects were recognized from ", max_label+1)
 
