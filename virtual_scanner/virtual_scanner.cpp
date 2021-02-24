@@ -54,8 +54,8 @@ loadDataSet (const char* file_name)
 int
 main (int argc, char** argv)
 {
-  if (argc < 2)
-  {
+	
+  if (argc < 2){
     PCL_INFO ("Usage %s [options] <model.ply | model.vtk>\n", argv[0]);
     PCL_INFO (" * where options are:\n"
               "         -object_coordinates <0|1> : save the dataset in object coordinates (1) or camera coordinates (0)\n"
@@ -68,8 +68,10 @@ main (int argc, char** argv)
               "");
     return (-1);
   }
+  
+ 
   std::string filename;
-  // Parse the command line arguments for .vtk or .ply files
+  // Parse the command line arguments for .vtk or .ply files -----------------------------------------------------------------------------------------------------------------------
   std::vector<int> p_file_indices_vtk = console::parse_file_extension_argument (argc, argv, ".vtk");
   std::vector<int> p_file_indices_ply = console::parse_file_extension_argument (argc, argv, ".ply");
   bool object_coordinates = true;
@@ -87,8 +89,9 @@ main (int argc, char** argv)
   else
     PCL_INFO ("Saving an unorganized dataset.\n");
 
+
   vtkSmartPointer<vtkPolyData> data;
-  // Loading PLY/VTK file
+  // Loading PLY/VTK file ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   if (p_file_indices_ply.empty () && p_file_indices_vtk.empty ())
   {
     PCL_ERROR ("Error: no .PLY or .VTK files given!\n");
@@ -107,7 +110,7 @@ main (int argc, char** argv)
   
   PCL_INFO ("Loaded model with %d vertices/points.\n", data->GetNumberOfPoints ());
 
-  // Default scan parameters
+  // Default scan parameters --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ScanParameters sp;
   sp.nr_scans           = 900;
   console::parse_argument (argc, argv, "-nr_scans", sp.nr_scans);
@@ -133,26 +136,26 @@ main (int argc, char** argv)
   std::string fname, base;
   char seq[256];
 
-  // Compute start/stop for vertical and horizontal
+  // Compute start/stop for vertical and horizontal ---------------------------------------------------------------------------------------------------------------------------------
   double vert_start = - (static_cast<double> (sp.nr_scans - 1) / 2.0) * sp.vert_res;
   double vert_end   = + ((sp.nr_scans-1) * sp.vert_res) + vert_start;
   double hor_start  = - (static_cast<double> (sp.nr_points_in_scans - 1) / 2.0) * sp.hor_res;
   double hor_end    = + ((sp.nr_points_in_scans-1) * sp.hor_res) + hor_start;
 
-  // Prepare the point cloud data
+  // Prepare the point cloud data ------------------------------------------------------------------------------------------------------------------------------------------------------------
   pcl::PointCloud<pcl::PointWithViewpoint> cloud;
 
-  // Prepare the leaves for downsampling
+  // Prepare the leaves for downsampling ----------------------------------------------------------------------------------------------------------------------------------------------
   pcl::VoxelGrid<pcl::PointWithViewpoint> grid;
-  grid.setLeafSize (2.5, 2.5, 2.5);    // @note: this value should be given in mm!
+  grid.setLeafSize (1.0, 1.0, 1.0);    // @note: this value should be given in mm!
 
-  // Reset and set a random seed for the Global Random Number Generator
+  // Reset and set a random seed for the Global Random Number Generator ----------------------------------------------------------------------------------------------
   boost::mt19937 rng (static_cast<unsigned int> (std::time (0)));
   boost::normal_distribution<float> normal_distrib (0.0f, noise_std * noise_std);
   boost::variate_generator<boost::mt19937&, boost::normal_distribution<float> > gaussian_rng (rng, normal_distrib);
 
   std::vector<std::string> st;
-  // Virtual camera parameters
+  // Virtual camera parameters -------------------------------------------------------------------------------------------------------------------------------------------------------------
   double eye[3]     = {0.0, 0.0, 0.0};
   double viewray[3] = {0.0, 0.0, 0.0};
   double up[3]      = {0.0, 0.0, 0.0};
@@ -164,23 +167,23 @@ main (int argc, char** argv)
   double p_coords[3], x[3], t;
   int subId;
  
-  // Create a Icosahedron at center in origin and radius of 1
+  // Create a Icosahedron at center in origin and radius of 1 ----------------------------------------------------------------------------------------------------------------------
   vtkSmartPointer<vtkPlatonicSolidSource> icosa = vtkSmartPointer<vtkPlatonicSolidSource>::New ();
   icosa->SetSolidTypeToIcosahedron ();
 
-  // Tesselize the source icosahedron (subdivide each triangular face
+  // Tesselize the source icosahedron (subdivide each triangular face --------------------------------------------------------------------------------------------------------
   // of the icosahedron into smaller triangles)
   vtkSmartPointer<vtkLoopSubdivisionFilter> subdivide = vtkSmartPointer<vtkLoopSubdivisionFilter>::New ();
   subdivide->SetNumberOfSubdivisions (subdiv_level);
   subdivide->SetInputConnection (icosa->GetOutputPort ());
   subdivide->Update ();
 
-  // Get camera positions
+  // Get camera positions --------------------------------------------------------------------------------------------------------------------------------------------------------------------
   vtkPolyData *sphere = subdivide->GetOutput ();
   if (!single_view)
     PCL_INFO ("Created %ld camera position points.\n", sphere->GetNumberOfPoints ());
 
-  // Build a spatial locator for our dataset
+  // Build a spatial locator for our dataset ------------------------------------------------------------------------------------------------------------------------------------------------
   vtkSmartPointer<vtkCellLocator> tree = vtkSmartPointer<vtkCellLocator>::New ();
   tree->SetDataSet (data);
   tree->CacheCellBoundsOn ();
@@ -190,10 +193,10 @@ main (int argc, char** argv)
   tree->BuildLocator ();
   tree->Update ();
 
-  // Get the min-max bounds of data
+  // Get the min-max bounds of data ----------------------------------------------------------------------------------------------------------------------------------------------------
   data->GetBounds (bounds);
 
-  // if single view is required iterate over loop only once
+  // if single view is required iterate over loop only once -------------------------------------------------------------------------------------------------------------------------
   int number_of_points = static_cast<int> (sphere->GetNumberOfPoints ());
   if (single_view)
     number_of_points = 1;

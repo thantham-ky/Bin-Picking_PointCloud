@@ -1,4 +1,4 @@
-# Install script for directory: /home/ckingkan/Documents/bin_picking_data/3D Pipe file/virtual_scanner
+# Install script for directory: /home/main/bin_picking_data/3D Pipe file/virtual_scanner
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/ckingkan/Documents/bin_picking_data/3D Pipe file/virtual_scanner/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/main/bin_picking_data/3D Pipe file/virtual_scanner/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
