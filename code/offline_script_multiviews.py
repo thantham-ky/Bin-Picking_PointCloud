@@ -13,7 +13,7 @@ partials_dir = "D:/thantham/Project/Bin-Picking_PointCloud/data/partial_views/pa
 partialview_des = "D:/thantham/Project/Bin-Picking_PointCloud/data/database/partial_views/icosahedron/"
 descriptor_des = "D:/thantham/Project/Bin-Picking_PointCloud/data/database/descriptors/icosahedron/"
 
-voxel_size = 0.002
+voxel_size = 0.003
 rescale_factor = 0.001
 
 def rescale_mm_to_m(pcd, factor):
