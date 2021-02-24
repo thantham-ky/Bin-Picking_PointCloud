@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 from sklearn.cluster import OPTICS
 
-camera_ply_file = "D:/thantham/Project/Bin-Picking_PointCloud/data/raw/online/90_real_9_pre.ply"
+camera_ply_file = "D:/thantham/Project/Bin-Picking_PointCloud/data/raw/online/90_real_1_pre.ply"
 
 partial_db_dir = "D:/thantham/Project/Bin-Picking_PointCloud/data/database/partial_views/icosahedron/"
 descriptor_db_dir = "D:/thantham/Project/Bin-Picking_PointCloud/data/database/descriptors/icosahedron/"
@@ -193,7 +193,7 @@ for each_cluster in range(max_label+1):
             
         else:
             # unobject_list.append(model_temp.transform(regis_result.transformation))
-            print("[INFO]-- partial view ", partial, " not matched, find next...")
+            print("[INFO]-- partial view ", partial, " not matched, find next...\n")
             
             
         
