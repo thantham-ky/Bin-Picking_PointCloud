@@ -5,20 +5,50 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import OPTICS, cluster_optics_dbscan
 
+import os
 
-raw_file = "D:/PointCloud/Project/data/raw/offline/180_cad_plane_rsc.pcd"
 
-pcd_file = "D:/PointCloud/Project/data/database/180_cad_plane_rsc.pcd"
-des_file = "D:/PointCloud/Project/data/database/180_cad_plane_rsc_des.des"
+partials_dir = "D:/thantham/Project/Bin-Picking_PointCloud/data/partial_views/partial_views_dodecahedron/"
+
+partialview_des = "D:/thantham/Project/Bin-Picking_PointCloud/data/database/partial_views/dodecahedron/"
+descriptor_des = "D:/thantham/Project/Bin-Picking_PointCloud/data/database/descriptors/dodecahedron/"
+
+voxel_size = 0.003
+
+# this is for rescale because CAD model created by mm. scale while camera read depth as m.
+rescale_factor = 0.001
+
+def rescale_mm_to_m(pcd, factor):
+    
+    points = np.asarray(pcd.points)
+
+    points = points*factor
+
+    new_pcd = o3d.geometry.PointCloud()
+
+    new_pcd.points = o3d.utility.Vector3dVector(points)
+    
+    return new_pcd
 
 # %% Read
-pcd = o3d.io.read_point_cloud(raw_file)
 
+partials_list = os.listdir(partials_dir)
+
+print("[INFO] partial views dir: ", partials_dir)
+print("[INFO] number of partial views: ", len(partials_list))
+print("[INFO] voxel size as ", voxel_size, "\n")
+
+for partial in partials_list:
+    
+    print("[PROCESS] process file: ", partial)
+
+    pcd = o3d.io.read_point_cloud(partials_dir+partial)
+
+    pcd = rescale_mm_to_m(pcd, 0.001)
 
 # %% Vox
 
-voxel_size = 0.0025
-pcd_vox = pcd.voxel_down_sample(voxel_size=voxel_size)
+    pcd_vox = pcd.voxel_down_sample(voxel_size=voxel_size)
 
 # %% outlier removal
 
@@ -57,20 +87,22 @@ pcd_vox = pcd.voxel_down_sample(voxel_size=voxel_size)
 
 # %% compute fpfh
 
-radius_normal = voxel_size * 2
+    radius_normal = voxel_size * 2
 
-radius_feature = voxel_size * 5
+    radius_feature = voxel_size * 5
 
-pcd_vox.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=30))
-
-pcd_vox_out_pln_des = o3d.pipelines.registration.compute_fpfh_feature(pcd_vox, o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
-
+    pcd_vox.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=30))
+    
+    pcd_vox_des = o3d.pipelines.registration.compute_fpfh_feature(pcd_vox, o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
+    
 # %% visualize
 
-o3d.visualization.draw([pcd_vox])
+    # o3d.visualization.draw([pcd_vox])
 
 
 # %% save
 
-o3d.io.write_point_cloud(pcd_file, pcd_vox, write_ascii=True)
-o3d.io.write_feature(des_file, pcd_vox_out_pln_des)
+    o3d.io.write_point_cloud(partialview_des+os.path.splitext(partial)[0]+"_part.pcd", pcd_vox, write_ascii=True)
+    o3d.io.write_feature(descriptor_des+os.path.splitext(partial)[0]+"_fpfh.des", pcd_vox_des)
+    
+print("[INFO] create partial views database completed")
