@@ -116,10 +116,10 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
         distance_threshol_regis,
         o3d.pipelines.registration.TransformationEstimationPointToPoint(),
         3, 
-        [o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.8), 
+        [o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.9), 
           o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(distance_threshol_regis),
-            o3d.pipelines.registration.CorrespondenceCheckerBasedOnNormal(0.8)], 
-        o3d.pipelines.registration.RANSACConvergenceCriteria(100000, 0.9999))
+            o3d.pipelines.registration.CorrespondenceCheckerBasedOnNormal(0.9)], 
+        o3d.pipelines.registration.RANSACConvergenceCriteria(1000000, 0.999))
     
     print("[INFO]", regis_result)
     
