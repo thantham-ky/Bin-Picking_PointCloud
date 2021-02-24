@@ -2,7 +2,7 @@ import copy
 import numpy as np
 import open3d as o3d
 
-camera_distance = 200
+camera_distance = 180
 
 xyz = np.array([[-2,1,0],
                 [-2,-1,0],

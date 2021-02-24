@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import os
 from sklearn.cluster import OPTICS
 
-camera_ply_file = "D:/thantham/Project/Bin-Picking_PointCloud/data/raw/online/90_real_1_pre.ply"
+camera_ply_file = "D:/PointCloud/Project/data/raw/online/90_real_1_pre.ply"
 
-partial_db_dir = "D:/thantham/Project/Bin-Picking_PointCloud/data/database/partial_views/dodecahedron/"
-descriptor_db_dir = "D:/thantham/Project/Bin-Picking_PointCloud/data/database/descriptors/dodecahedron/"
+partial_db_dir = "D:/PointCloud/Project/data/database/partial_views/dodecahedron/"
+descriptor_db_dir = "D:/PointCloud/Project/data/database/descriptors/dodecahedron/"
 
 voxel_size = 0.003
 
@@ -119,7 +119,7 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
         [o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.9), 
           o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(distance_threshol_regis),
             o3d.pipelines.registration.CorrespondenceCheckerBasedOnNormal(0.9)], 
-        o3d.pipelines.registration.RANSACConvergenceCriteria(1000000, 0.999))
+        o3d.pipelines.registration.RANSACConvergenceCriteria(100000, 0.99))
     
     print("[INFO]", regis_result)
     

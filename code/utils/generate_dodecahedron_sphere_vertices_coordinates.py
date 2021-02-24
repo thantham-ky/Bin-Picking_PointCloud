@@ -45,4 +45,4 @@ pcd.points = o3d.utility.Vector3dVector(xyz)
 
 
 # o3d.visualization.draw([pcd])
-o3d.io.write_point_cloud('D:/thantham/bin_picking_data/3D Pipe file/virtual_cam_position_dodecahedron.pcd', pcd, write_ascii=True)
+#o3d.io.write_point_cloud('D:/thantham/bin_picking_data/3D Pipe file/virtual_cam_position_dodecahedron.pcd', pcd, write_ascii=True)

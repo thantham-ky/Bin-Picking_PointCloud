@@ -8,10 +8,10 @@ from sklearn.cluster import OPTICS, cluster_optics_dbscan
 import os
 
 
-partials_dir = "D:/thantham/Project/Bin-Picking_PointCloud/data/partial_views/partial_views_dodecahedron/"
+partials_dir = "D:/PointCloud/Project/data/partial_views/partial_views_dodecahedron/"
 
-partialview_des = "D:/thantham/Project/Bin-Picking_PointCloud/data/database/partial_views/dodecahedron/"
-descriptor_des = "D:/thantham/Project/Bin-Picking_PointCloud/data/database/descriptors/dodecahedron/"
+partialview_des = "D:/PointCloud/Project/data/database/partial_views/dodecahedron/"
+descriptor_des = "D:/PointCloud/Project/data/database/descriptors/dodecahedron/"
 
 voxel_size = 0.003
 
