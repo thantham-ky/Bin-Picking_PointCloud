@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 from sklearn.cluster import OPTICS
 
-camera_ply_file = "/data/raw/online/90_real_1_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_6_pre.ply"
 
 cad_model_file = "/data/cad_models/Pipe_02.ply"
 
@@ -41,13 +41,13 @@ global_pcd_vox = global_pcd.voxel_down_sample(voxel_size = voxel_size)
 print("[PROCESS] Remove Outlier Using Radius Method")
 # cl, ind = global_pcd_vox.remove_statistical_outlier(nb_neighbors=15, std_ratio=1.0)
 cl, ind = global_pcd_vox.remove_radius_outlier(nb_points=40, radius=0.05)
-
+object_cloud = global_pcd_vox.select_by_index(ind)
 # o3d.visualization.draw([cl])
 
 # %% 4 Remove plane
 
 # global_pcd_vox_plane = global_pcd_vox.select_by_index(ind)
-object_cloud = global_pcd_vox.select_by_index(ind)
+
 
 # plane_model, inliers = global_pcd_vox_plane.segment_plane(distance_threshold=0.01, ransac_n=3, num_iterations=1000)
 
@@ -239,7 +239,13 @@ target_object.paint_uniform_color([1,0,0])
 
 # print("[INFO] found object was located at ", object_center_on_axis)
 
-o3d.visualization.draw_geometries([object_cloud, target_object, target_object_pose, target_object_cad])
+o3d.visualization.draw_geometries([object_cloud, 
+                                   target_object, 
+                                   target_object_pose, 
+                                   target_object_cad],
+                                  mesh_show_wireframe=False,
+                                  point_show_normal=False,
+                                  mesh_show_back_face=True)
 # o3d.visualization.draw_geometries([object_list[0].create_arrow()])
 
 # fitness_threshold = 0.3
