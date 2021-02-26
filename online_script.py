@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 from sklearn.cluster import OPTICS
 
-camera_ply_file = "/data/raw/online/90_real_3_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_9_pre.ply"
 
 partial_db_dir = "/data/database/partial_views/dodecahedron/"
 descriptor_db_dir = "/data/database/descriptors/dodecahedron/"
@@ -119,7 +119,7 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
         [o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.9), 
           o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(distance_threshol_regis),
             o3d.pipelines.registration.CorrespondenceCheckerBasedOnNormal(0.9)], 
-        o3d.pipelines.registration.RANSACConvergenceCriteria(100000, 0.8))
+        o3d.pipelines.registration.RANSACConvergenceCriteria(1000000, 0.7))
     
     print("[INFO]", regis_result)
     
@@ -143,6 +143,7 @@ print("[PROCESS] Matching and Registration\n")
 
 object_list = []
 unobject_list = []
+object_pose_list = []
 
 for each_cluster in range(max_label+1):
     
@@ -160,7 +161,7 @@ for each_cluster in range(max_label+1):
     
     object_fpfh = o3d.pipelines.registration.compute_fpfh_feature(object_i, o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
     
-    
+    pose_axis = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.055, origin = np.array([0., 0., -0.06]))
 
     for partial, descriptor in zip(partial_db_files, descriptor_db_files):
         
@@ -170,6 +171,7 @@ for each_cluster in range(max_label+1):
 
         #define temp partial view for final transformation
         model_temp = copy.deepcopy(db_pcd)
+        axis_temp = copy.deepcopy(pose_axis)
     
         # object_i = object_cloud.select_by_index(np.transpose(np.where(labels==each_cluster)))
     
@@ -191,9 +193,14 @@ for each_cluster in range(max_label+1):
         if regis_result.fitness >= best_fit:
             
             best_fit = regis_result.fitness
+            transformation = regis_result.transformation
             
             object_list.clear()
-            object_list.append(model_temp.transform(regis_result.transformation))
+            object_list.append(model_temp.transform(transformation))
+            
+            object_pose_list.clear()
+            object_pose_list.append(axis_temp.transform(transformation))
+            
             print("[INFO]-- partial view ", partial, " is best fit, find next...\n")
             
         else:
@@ -214,7 +221,7 @@ for unobject_i in unobject_list:
     
 # plane_cloud.paint_uniform_color([0.9,0.9,0.9])
 
-o3d.visualization.draw(object_list+[object_cloud])
+o3d.visualization.draw_geometries(object_list+[object_cloud]+object_pose_list)
 
 # fitness_threshold = 0.3
 
