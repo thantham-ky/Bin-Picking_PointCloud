@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 from sklearn.cluster import OPTICS
 
-camera_ply_file = "/data/raw/online/90_real_9_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_1_pre.ply"
 
 partial_db_dir = "/data/database/partial_views/dodecahedron/"
 descriptor_db_dir = "/data/database/descriptors/dodecahedron/"
