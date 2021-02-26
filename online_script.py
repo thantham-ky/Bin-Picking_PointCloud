@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 from sklearn.cluster import OPTICS
 
-camera_ply_file = "/data/raw/online/90_real_9_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_1_pre.ply"
 
 cad_model_file = "/data/cad_models/Pipe_02.ply"
 
@@ -143,10 +143,10 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
 
 print("[PROCESS] Matching and Registration\n")
 
-object_list = []
+target_object = None
 # unobject_list = []
-object_pose_list = []
-cad_model_list = []
+target_object_pose = None
+target_object_cad = None
 
 pose_axis = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.055, origin = np.array([0., 0., -0.06]))
 
@@ -159,6 +159,8 @@ for each_cluster in range(max_label+1):
 # limit at max labels
 
     best_fit = 0.0
+    
+    best_regis_result = None
     
     object_i = copy.deepcopy(object_cloud)
     
@@ -202,17 +204,10 @@ for each_cluster in range(max_label+1):
         if regis_result.fitness >= best_fit:
             
             best_fit = regis_result.fitness
-            transformation = regis_result.transformation
+            # transformation = regis_result.transformation
             
-            object_list.clear()
-            object_list.append(model_temp.transform(transformation))
+            best_regis_result = regis_result
             
-            object_pose_list.clear()
-            object_pose_list.append(axis_temp.transform(transformation))
-            
-            cad_model_list.clear()
-            cad_model_list.append(cad_temp.transform(transformation))
-                
             
             print("[INFO]-- partial view ", partial, " is best fit, find next... ****************\n")
             
@@ -221,20 +216,30 @@ for each_cluster in range(max_label+1):
             print("[INFO]-- partial view ", partial, " not fit, find next...\n")
             
             
-        
 
-print("\n[RESULT] ", len(object_list), " objects were recognized from ", max_label+1)
+    target_object= model_temp.transform(best_regis_result.transformation)     
+            
+    target_object_pose = axis_temp.transform(best_regis_result.transformation)
+            
+    target_object_cad = cad_temp.transform(best_regis_result.transformation)
+    
+    object_center_on_axis = target_object_cad.get_center()
+
+print("\n[RESULT] ", " objects detected at ",  object_center_on_axis)
 
 
-for object_i in object_list:
-    object_i.paint_uniform_color([1,0,0])
+# for object_i in object_list:
+target_object.paint_uniform_color([1,0,0])
     
 # for unobject_i in unobject_list:
 #     unobject_i.paint_uniform_color([0,1,0])
     
 # plane_cloud.paint_uniform_color([0.9,0.9,0.9])
 
-o3d.visualization.draw_geometries(object_list+[object_cloud]+object_pose_list+cad_model_list)
+
+# print("[INFO] found object was located at ", object_center_on_axis)
+
+o3d.visualization.draw_geometries([object_cloud, target_object, target_object_pose, target_object_cad])
 # o3d.visualization.draw_geometries([object_list[0].create_arrow()])
 
 # fitness_threshold = 0.3
