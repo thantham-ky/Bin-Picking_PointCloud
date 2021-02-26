@@ -5,17 +5,17 @@ import matplotlib.pyplot as plt
 import os
 from sklearn.cluster import OPTICS
 
-camera_ply_file = "D:/PointCloud/Project/data/raw/online/90_real_1_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_9_pre.ply"
 
-partial_db_dir = "D:/PointCloud/Project/data/database/partial_views/dodecahedron/"
-descriptor_db_dir = "D:/PointCloud/Project/data/database/descriptors/dodecahedron/"
+partial_db_dir = "/data/database/partial_views/dodecahedron/"
+descriptor_db_dir = "/data/database/descriptors/dodecahedron/"
 
-voxel_size = 0.003
+voxel_size = 0.005
 
 # %% 0 Show info
 
-partial_db_files = os.listdir(partial_db_dir)
-descriptor_db_files = os.listdir(descriptor_db_dir)
+partial_db_files = os.listdir(os.getcwd()+partial_db_dir)
+descriptor_db_files = os.listdir(os.getcwd() +descriptor_db_dir)
 
 print("[INFO] Global point cloud : ", camera_ply_file)
 print("[INFO] Descriptors collection: ", descriptor_db_dir)
@@ -24,8 +24,8 @@ print("[INFO] Number of reference data: ", len(partial_db_files))
 
 # %% 1 Read pcd
 
-print("\n[PROCESS] Read global Point Cloud ", camera_ply_file)
-global_pcd = o3d.io.read_point_cloud(camera_ply_file)
+print("\n[PROCESS] Read global Point Cloud ", os.getcwd()+camera_ply_file)
+global_pcd = o3d.io.read_point_cloud(os.getcwd()+camera_ply_file)
 
 
 # %% 2 Voxel downasmpling
@@ -149,19 +149,30 @@ for each_cluster in range(max_label+1):
 # limit at max labels
 
     best_fit = 0.0
+    
+    object_i = copy.deepcopy(object_cloud)
+    
+    radius_feature = voxel_size * 5
+    
+    radius_normal = voxel_size *2
+    
+    object_i.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius = radius_normal, max_nn=30))
+    
+    object_fpfh = o3d.pipelines.registration.compute_fpfh_feature(object_i, o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
+    
+    
 
     for partial, descriptor in zip(partial_db_files, descriptor_db_files):
         
         # Read a partial view in db
-        db_pcd = o3d.io.read_point_cloud(partial_db_dir + partial)
-        db_des = o3d.io.read_feature(descriptor_db_dir + descriptor)
+        db_pcd = o3d.io.read_point_cloud(os.getcwd()+partial_db_dir + partial)
+        db_des = o3d.io.read_feature(os.getcwd()+descriptor_db_dir + descriptor)
 
         #define temp partial view for final transformation
         model_temp = copy.deepcopy(db_pcd)
     
         # object_i = object_cloud.select_by_index(np.transpose(np.where(labels==each_cluster)))
     
-        object_i = copy.deepcopy(object_cloud)
         
         print("[INFO] Matching to partial view: ", partial)
         # o3d.visualization.draw([db_pcd])
@@ -170,14 +181,7 @@ for each_cluster in range(max_label+1):
     
     # %%% compute fpfh
     
-        radius_feature = voxel_size * 5
-    
-        radius_normal = voxel_size *2
-    
-        object_i.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius = radius_normal, max_nn=30))
-    
-        object_fpfh = o3d.pipelines.registration.compute_fpfh_feature(object_i, o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
-    
+       
         regis_result = execute_global_registration_refine(db_pcd, object_i, db_des, object_fpfh ,voxel_size)
     
     
