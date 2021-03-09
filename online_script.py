@@ -6,7 +6,7 @@ import os
 from sklearn.cluster import OPTICS
 from scipy.spatial.transform import Rotation as R
 
-camera_ply_file = "/data/raw/online/90_real_1_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_2_pre.ply"
 
 cad_model_file = "/data/cad_models/Pipe_02.ply"
 
@@ -236,7 +236,8 @@ for each_cluster in range(max_label+1):
 
 
 print("\n[RESULT] ", " the object center located at [x y z]:",  object_center_on_axis)
-print("\n[RESULT] ", " the object rotation is (euler)[x y z]:",  dof3)
+print("[RESULT] ", " the object rotation is (euler)[x y z]:",  dof3)
+print("[REMARK] ", " the position xyz referenced from camera origin")
 
 
 
