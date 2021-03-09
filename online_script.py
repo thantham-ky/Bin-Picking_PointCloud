@@ -4,8 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from sklearn.cluster import OPTICS
+from scipy.spatial.transform import Rotation as R
 
-camera_ply_file = "/data/raw/online/90_real_6_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_1_pre.ply"
 
 cad_model_file = "/data/cad_models/Pipe_02.ply"
 
@@ -162,6 +163,8 @@ for each_cluster in range(max_label+1):
     
     best_regis_result = None
     
+    best_transform = None
+    
     object_i = copy.deepcopy(object_cloud)
     
     radius_feature = voxel_size * 5
@@ -215,7 +218,7 @@ for each_cluster in range(max_label+1):
             # unobject_list.append(model_temp.transform(regis_result.transformation))
             print("[INFO]-- partial view ", partial, " not fit, find next...\n")
             
-            
+    best_transform = best_regis_result.transformation        
 
     target_object= model_temp.transform(best_regis_result.transformation)     
             
@@ -224,8 +227,17 @@ for each_cluster in range(max_label+1):
     target_object_cad = cad_temp.transform(best_regis_result.transformation)
     
     object_center_on_axis = target_object_cad.get_center()
+    
+    
+    #Define 3 dof
+    rotation_matrix = best_transform[:3,:3]
+    r = R.from_matrix(rotation_matrix.tolist())
+    dof3 = r.as_euler('xyz', degrees=True)
 
-print("\n[RESULT] ", " objects detected at ",  object_center_on_axis)
+
+print("\n[RESULT] ", " the object center located at [x y z]:",  object_center_on_axis)
+print("\n[RESULT] ", " the object rotation is (euler)[x y z]:",  dof3)
+
 
 
 # for object_i in object_list:
@@ -242,7 +254,7 @@ target_object.paint_uniform_color([1,0,0])
 o3d.visualization.draw_geometries([object_cloud, 
                                    target_object, 
                                    target_object_pose, 
-                                   target_object_cad],
+                                    target_object_cad],
                                   mesh_show_wireframe=False,
                                   point_show_normal=False,
                                   mesh_show_back_face=True)
