@@ -6,6 +6,8 @@ import os
 from sklearn.cluster import OPTICS
 from scipy.spatial.transform import Rotation as R
 
+import time
+
 camera_ply_file = "/data/raw/online/90_real_2_pre.ply"
 
 cad_model_file = "/data/cad_models/Pipe_02.ply"
@@ -14,6 +16,8 @@ partial_db_dir = "/data/database/partial_views/dodecahedron/"
 descriptor_db_dir = "/data/database/descriptors/dodecahedron/"
 
 voxel_size = 0.005
+
+fitness_threshold = 0.2
 
 # %% 0 Show info
 
@@ -45,7 +49,7 @@ cl, ind = global_pcd_vox.remove_radius_outlier(nb_points=40, radius=0.05)
 object_cloud = global_pcd_vox.select_by_index(ind)
 # o3d.visualization.draw([cl])
 
-# %% 4 Remove plane
+# %% 4 Remove plane (Unused)
 
 # global_pcd_vox_plane = global_pcd_vox.select_by_index(ind)
 
@@ -64,7 +68,7 @@ object_cloud = global_pcd_vox.select_by_index(ind)
 
 # o3d.visualization.draw([object_cloud])  
 
-# %% Clustering
+# %% Clustering (Unused)
 
 # with o3d.utility.VerbosityContextManager(
 #         o3d.utility.VerbosityLevel.Debug) as cm:
@@ -140,25 +144,27 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
     return refine_result
 
 
-# %% For each cluster
+# %% MAIN 
 
 print("[PROCESS] Matching and Registration\n")
 
+# Init detected object
 target_object = None
-# unobject_list = []
 target_object_pose = None
 target_object_cad = None
 
+# create axis frame
 pose_axis = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.055, origin = np.array([0., 0., -0.06]))
 
+# create cad model mesh
 cad_model = o3d.io.read_triangle_mesh(os.getcwd()+cad_model_file)
 cad_model = cad_model.scale(scale=0.001, center=np.array([0,0,0]))
 cad_model.compute_vertex_normals()
 
+# Loop case of multiple cluster
 for each_cluster in range(max_label+1):
-    
-# limit at max labels
 
+    # init parameter
     best_fit = 0.0
     
     best_regis_result = None
@@ -171,11 +177,13 @@ for each_cluster in range(max_label+1):
     
     radius_normal = voxel_size *2
     
+    # estimate normal and compute descriptor for global point cloud
     object_i.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius = radius_normal, max_nn=30))
     
     object_fpfh = o3d.pipelines.registration.compute_fpfh_feature(object_i, o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
     
 
+    # Loop start - for each partial views from database
     for partial, descriptor in zip(partial_db_files, descriptor_db_files):
         
         # Read a partial view in db
@@ -193,10 +201,6 @@ for each_cluster in range(max_label+1):
         print("[INFO] Matching to partial view: ", partial)
         # o3d.visualization.draw([db_pcd])
     
-    # %% Registration
-    
-    # %%% compute fpfh
-    
        
         regis_result = execute_global_registration_refine(db_pcd, object_i, db_des, object_fpfh ,voxel_size)
     
@@ -204,7 +208,7 @@ for each_cluster in range(max_label+1):
         # print("\nRegistration transformation: \n", regis_result.transformation)
         
         
-        if regis_result.fitness >= best_fit:
+        if (regis_result.fitness >= best_fit) & (regis_result.fitness >= fitness_threshold):
             
             best_fit = regis_result.fitness
             # transformation = regis_result.transformation
@@ -215,29 +219,39 @@ for each_cluster in range(max_label+1):
             print("[INFO]-- partial view ", partial, " is best fit, find next... ****************\n")
             
         else:
-            # unobject_list.append(model_temp.transform(regis_result.transformation))
+        
             print("[INFO]-- partial view ", partial, " not fit, find next...\n")
+    
+    # Loop end
             
-    best_transform = best_regis_result.transformation        
-
-    target_object= model_temp.transform(best_regis_result.transformation)     
-            
+    # Finalize object found in global point cloud
+    
+        # get best transformation
+    best_transform = best_regis_result.transformation       
+        
+        # transform a partial view to global point cloud 
+    target_object= model_temp.transform(best_regis_result.transformation) 
+    
+        # transform a axis frame to detected object
     target_object_pose = axis_temp.transform(best_regis_result.transformation)
             
+        # transform a cad model to detected position
     target_object_cad = cad_temp.transform(best_regis_result.transformation)
     
+        # get x y z of object
     object_center_on_axis = target_object_cad.get_center()
     
-    
-    #Define 3 dof
+        # get rotation pose of object
     rotation_matrix = best_transform[:3,:3]
     r = R.from_matrix(rotation_matrix.tolist())
-    dof3 = r.as_euler('xyz', degrees=True)
+    rotation = r.as_euler('xyz', degrees=True)
 
+
+time.sleep(2)
 
 print("\n[RESULT] ", " the object center located at [x y z]:",  object_center_on_axis)
-print("[RESULT] ", " the object rotation is (euler)[x y z]:",  dof3)
-print("[REMARK] ", " the position xyz referenced from camera origin")
+print("[RESULT] ", " the object rotation is (euler-degrees)[x y z]:",  rotation)
+print("[REMARK] ", " the object position referenced from camera origin")
 
 
 
