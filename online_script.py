@@ -17,7 +17,7 @@ descriptor_db_dir = "/data/database/descriptors/dodecahedron/"
 
 voxel_size = 0.005
 
-fitness_threshold = 0.2
+fitness_threshold = 0.5
 
 # %% 0 Show info
 
@@ -152,6 +152,7 @@ print("[PROCESS] Matching and Registration\n")
 target_object = None
 target_object_pose = None
 target_object_cad = None
+regis_result_list = []
 
 # create axis frame
 pose_axis = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.055, origin = np.array([0., 0., -0.06]))
@@ -215,12 +216,31 @@ for each_cluster in range(max_label+1):
             
             best_regis_result = regis_result
             
+            regis_result_list.append(regis_result)
+            
             
             print("[INFO]-- partial view ", partial, " is best fit, find next... ****************\n")
             
         else:
         
             print("[INFO]-- partial view ", partial, " not fit, find next...\n")
+            
+        # if (regis_result.fitness >= fitness_threshold):
+            
+        #     # best_fit = regis_result.fitness
+        #     # transformation = regis_result.transformation
+            
+        #     # best_regis_result = regis_result
+            
+        #     regis_result_list.append(regis_result)
+            
+            
+        #     print("[INFO]-- partial view ", partial, " is best fit, find next... ****************\n")
+            
+        # else:
+        
+        #     print("[INFO]-- partial view ", partial, " not fit, find next...\n")
+    
     
     # Loop end
             
@@ -255,34 +275,37 @@ print("[REMARK] ", " the object position referenced from camera origin")
 
 
 
-# for object_i in object_list:
+# # for object_i in object_list:
 target_object.paint_uniform_color([1,0,0])
     
-# for unobject_i in unobject_list:
-#     unobject_i.paint_uniform_color([0,1,0])
+# # for unobject_i in unobject_list:
+# #     unobject_i.paint_uniform_color([0,1,0])
     
-# plane_cloud.paint_uniform_color([0.9,0.9,0.9])
+# # plane_cloud.paint_uniform_color([0.9,0.9,0.9])
 
-
-# print("[INFO] found object was located at ", object_center_on_axis)
+# # print("[INFO] found object was located at ", object_center_on_axis)
 
 o3d.visualization.draw_geometries([object_cloud, 
-                                   target_object, 
-                                   target_object_pose, 
+                                    target_object, 
+                                    target_object_pose, 
                                     target_object_cad],
                                   mesh_show_wireframe=False,
                                   point_show_normal=False,
                                   mesh_show_back_face=True)
 # o3d.visualization.draw_geometries([object_list[0].create_arrow()])
 
-# fitness_threshold = 0.3
+# %% case of order regis
+# result_list = []
 
-# if regis_result.fitness > fitness_threshold:
-#     isMatch = True
-# else:
-#     isMatch = False
-
-# print("[INFO] ","object ", i+1 ,"Is matched? -> ", isMatch)
+# for i in range(len(regis_result_list)):
+#     temp = copy.deepcopy(cad_model).transform(regis_result_list[i].transformation)
+    
+#     result_list.append(temp)
+    
+# o3d.visualization.draw_geometries([object_cloud]+ result_list,    
+#                                   mesh_show_wireframe=False,
+#                                   point_show_normal=False,
+#                                   mesh_show_back_face=True)  
 
 
 
