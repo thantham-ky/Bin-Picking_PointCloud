@@ -8,7 +8,7 @@ from scipy.spatial.transform import Rotation as R
 
 import time
 
-camera_ply_file = "/data/raw/online/90_real_2_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_12_pre.ply"
 
 cad_model_file = "/data/cad_models/Pipe_02.ply"
 
@@ -245,33 +245,36 @@ for each_cluster in range(max_label+1):
     # Loop end
             
     # Finalize object found in global point cloud
-    
+    if best_regis_result != None:
         # get best transformation
-    best_transform = best_regis_result.transformation       
+        best_transform = best_regis_result.transformation       
         
         # transform a partial view to global point cloud 
-    target_object= model_temp.transform(best_regis_result.transformation) 
+        target_object= model_temp.transform(best_regis_result.transformation) 
     
         # transform a axis frame to detected object
-    target_object_pose = axis_temp.transform(best_regis_result.transformation)
+        target_object_pose = axis_temp.transform(best_regis_result.transformation)
             
         # transform a cad model to detected position
-    target_object_cad = cad_temp.transform(best_regis_result.transformation)
+        target_object_cad = cad_temp.transform(best_regis_result.transformation)
     
         # get x y z of object
-    object_center_on_axis = target_object_cad.get_center()
+        object_center_on_axis = target_object_cad.get_center()
     
         # get rotation pose of object
-    rotation_matrix = best_transform[:3,:3]
-    r = R.from_matrix(rotation_matrix.tolist())
-    rotation = r.as_euler('xyz', degrees=True)
+        rotation_matrix = best_transform[:3,:3]
+        r = R.from_matrix(rotation_matrix.tolist())
+        rotation = r.as_euler('xyz', degrees=True)
 
+    else:
+        object_center_on_axis = 'No axis'
+        rotation = 'No rotation'
+    time.sleep(2)
 
-time.sleep(2)
-
-print("\n[RESULT] ", " the object center located at [x y z]:",  object_center_on_axis)
-print("[RESULT] ", " the object rotation is (euler-degrees)[x y z]:",  rotation)
-print("[REMARK] ", " the object position referenced from camera origin")
+    print("\n[RESULT] ", " the object center located at [x y z]:",  object_center_on_axis)
+    print("[RESULT] ", " the object rotation is (euler-degrees)[x y z]:",  rotation)
+    print("[REMARK] ", " the object position referenced from camera origin")
+    
 
 
 
@@ -287,8 +290,8 @@ target_object.paint_uniform_color([1,0,0])
 
 o3d.visualization.draw_geometries([object_cloud, 
                                     target_object, 
-                                    target_object_pose, 
-                                    target_object_cad],
+                                    target_object_pose], 
+                                    #target_object_cad],
                                   mesh_show_wireframe=False,
                                   point_show_normal=False,
                                   mesh_show_back_face=True)
