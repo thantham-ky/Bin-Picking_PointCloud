@@ -8,7 +8,7 @@ from scipy.spatial.transform import Rotation as R
 
 import time
 
-camera_ply_file = "/data/raw/online/90_real_12_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_25_pre.ply"
 
 cad_model_file = "/data/cad_models/Pipe_02.ply"
 
@@ -27,7 +27,7 @@ descriptor_db_files = os.listdir(os.getcwd() +descriptor_db_dir)
 print("[INFO] Global point cloud : ", camera_ply_file)
 print("[INFO] Descriptors collection: ", descriptor_db_dir)
 print("[INFO] Number of reference data: ", len(partial_db_files))
-
+t0 = time.time()
 
 # %% 1 Read pcd
 
@@ -277,7 +277,8 @@ for each_cluster in range(max_label+1):
     
 
 
-
+t1 = time.time()
+print ("[TIME]"," process complete in ",(t1-t0), " sec")
 # # for object_i in object_list:
 target_object.paint_uniform_color([1,0,0])
     
