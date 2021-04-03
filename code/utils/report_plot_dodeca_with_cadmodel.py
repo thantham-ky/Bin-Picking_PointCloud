@@ -2,8 +2,8 @@ import open3d as o3d
 import numpy as np
 import pyvista as pv
 
-camera_pc = "D:/thantham/Project/Bin-Picking_PointCloud/data/virtual_cam_position/virtual_cam_position_dodecahedron.pcd"
-cad_mesh = "D:/thantham/Project/Bin-Picking_PointCloud/data/cad_models/Pipe_02.ply"
+camera_pc = "D:/PointCloud/Project/data/virtual_cam_position/virtual_cam_position_dodecahedron.pcd"
+cad_mesh = "D:/PointCloud/Project/data/cad_models/Pipe_02.ply"
 
 camera = o3d.io.read_point_cloud(camera_pc)
 points = np.asarray(camera.points)
