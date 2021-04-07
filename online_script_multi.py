@@ -9,7 +9,7 @@ from numba import vectorize
 
 import time
 
-camera_ply_file = "/data/raw/online/90_real_17_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_15_pre.ply"
 
 cad_model_file = "/data/cad_models/Pipe_02.ply"
 
