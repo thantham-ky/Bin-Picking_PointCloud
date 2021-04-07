@@ -290,26 +290,25 @@ target_object.paint_uniform_color([1,0,0])
 # # print("[INFO] found object was located at ", object_center_on_axis)
 
 o3d.visualization.draw_geometries([object_cloud, 
-                                    target_object, 
-                                    target_object_pose], 
-                                    #target_object_cad],
-                                  mesh_show_wireframe=False,
-                                  point_show_normal=False,
-                                  mesh_show_back_face=True)
+                                    target_object], 
+                                    #target_object_pose], 
+                                    target_object_cad]
+                                  )
 # o3d.visualization.draw_geometries([object_list[0].create_arrow()])
 
 # %% case of order regis
-# result_list = []
 
-# for i in range(len(regis_result_list)):
-#     temp = copy.deepcopy(cad_model).transform(regis_result_list[i].transformation)
-    
-#     result_list.append(temp)
-    
-# o3d.visualization.draw_geometries([object_cloud]+ result_list,    
-#                                   mesh_show_wireframe=False,
-#                                   point_show_normal=False,
-#                                   mesh_show_back_face=True)  
+pc_obj = np.asarray(target_object.points)
+pc_scene = np.asarray(object_cloud.points)
 
+from scipy.spatial import cKDTree
 
+tree = cKDTree(pc_obj)
 
+dist, idx = tree.query(pc_scene)
+
+id_rm = [i for i in range(len(dist)) if dist[i] > 0.01]
+
+new_scene = object_cloud.select_by_index(id_rm, invert=False)
+
+o3d.visualization.draw([new_scene])
