@@ -13,7 +13,7 @@ partials_dir = "/data/partial_views/partial_views_dodecahedron/"
 partialview_des = "/data/database/partial_views/dodecahedron/"
 descriptor_des = "/data/database/descriptors/dodecahedron/"
 
-voxel_size = 0.005
+voxel_size = 0.004
 
 # this is for rescale because CAD model created by mm. scale while camera read depth as m.
 rescale_factor = 0.001
