@@ -8,14 +8,14 @@ from scipy.spatial.transform import Rotation as R
 
 import time
 
-camera_ply_file = "/data/raw/online/90_real_25_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_30_pre.ply"
 
 cad_model_file = "/data/cad_models/Pipe_02.ply"
 
 partial_db_dir = "/data/database/partial_views/dodecahedron/"
 descriptor_db_dir = "/data/database/descriptors/dodecahedron/"
 
-voxel_size = 0.005
+voxel_size = 0.004
 
 fitness_threshold = 0.5
 
@@ -290,25 +290,25 @@ target_object.paint_uniform_color([1,0,0])
 # # print("[INFO] found object was located at ", object_center_on_axis)
 
 o3d.visualization.draw_geometries([object_cloud, 
-                                    target_object], 
-                                    #target_object_pose], 
-                                    target_object_cad]
-                                  )
+                                    # target_object, 
+                                    target_object_pose,
+                                    target_object_cad], 
+                                    )
 # o3d.visualization.draw_geometries([object_list[0].create_arrow()])
 
 # %% case of order regis
 
-pc_obj = np.asarray(target_object.points)
-pc_scene = np.asarray(object_cloud.points)
+# pc_obj = np.asarray(target_object.points)
+# pc_scene = np.asarray(object_cloud.points)
 
-from scipy.spatial import cKDTree
+# from scipy.spatial import cKDTree
 
-tree = cKDTree(pc_obj)
+# tree = cKDTree(pc_obj)
 
-dist, idx = tree.query(pc_scene)
+# dist, idx = tree.query(pc_scene)
 
-id_rm = [i for i in range(len(dist)) if dist[i] > 0.01]
+# id_rm = [i for i in range(len(dist)) if dist[i] > 0.01]
 
-new_scene = object_cloud.select_by_index(id_rm, invert=False)
+# new_scene = object_cloud.select_by_index(id_rm, invert=False)
 
-o3d.visualization.draw([new_scene])
+# o3d.visualization.draw([new_scene])

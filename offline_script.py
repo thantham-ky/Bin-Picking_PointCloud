@@ -102,7 +102,7 @@ for partial in partials_list:
 
 # %% save
 
-    o3d.io.write_point_cloud(os.getcwd()+partialview_des+os.path.splitext(partial)[0]+"_part.pcd", pcd_vox, write_ascii=True)
-    o3d.io.write_feature(os.getcwd()+descriptor_des+os.path.splitext(partial)[0]+"_fpfh.des", pcd_vox_des)
+    # o3d.io.write_point_cloud(os.getcwd()+partialview_des+os.path.splitext(partial)[0]+"_part.pcd", pcd_vox, write_ascii=True)
+    # o3d.io.write_feature(os.getcwd()+descriptor_des+os.path.splitext(partial)[0]+"_fpfh.des", pcd_vox_des)
     
 print("[INFO] create partial views database completed")

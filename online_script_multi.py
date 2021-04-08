@@ -9,7 +9,7 @@ from numba import vectorize
 
 import time
 
-camera_ply_file = "/data/raw/online/90_real_15_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_26_pre.ply"
 
 cad_model_file = "/data/cad_models/Pipe_02.ply"
 
@@ -62,7 +62,7 @@ def execute_global_registration_refine(source_down, target_down, source_fpfh, ta
         [o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(0.9), 
           o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(distance_threshol_regis),
             o3d.pipelines.registration.CorrespondenceCheckerBasedOnNormal(0.9)], 
-        o3d.pipelines.registration.RANSACConvergenceCriteria(1000000, 0.8))
+        o3d.pipelines.registration.RANSACConvergenceCriteria(1000000, 0.7))
     
     # print("[INFO]", regis_result)
     
@@ -221,7 +221,7 @@ virtual_object, virtual_axis, virtual_xyz, virtual_rot = generate_cad_model_to_s
 for i in range(len(virtual_xyz)):
     print("[RESULT] object position: ",virtual_xyz[i], ", object rotation(deg): ", virtual_rot[i])
 
-o3d.visualization.draw_geometries([find_scene] + virtual_object)
+o3d.visualization.draw_geometries([object_cloud]+virtual_axis+object_list)
 
 # %%
 
