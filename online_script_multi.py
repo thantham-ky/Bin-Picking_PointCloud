@@ -9,7 +9,7 @@ from numba import vectorize
 
 import time
 
-camera_ply_file = "/data/raw/online/90_real_26_pre.ply"
+camera_ply_file = "/data/raw/online/90_real_25_pre.ply"
 
 cad_model_file = "/data/cad_models/Pipe_02.ply"
 
@@ -221,7 +221,7 @@ virtual_object, virtual_axis, virtual_xyz, virtual_rot = generate_cad_model_to_s
 for i in range(len(virtual_xyz)):
     print("[RESULT] object position: ",virtual_xyz[i], ", object rotation(deg): ", virtual_rot[i])
 
-o3d.visualization.draw_geometries([object_cloud]+virtual_axis+object_list)
+o3d.visualization.draw_geometries([object_cloud]+virtual_object+object_list)
 
 # %%
 

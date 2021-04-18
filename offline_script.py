@@ -97,7 +97,7 @@ for partial in partials_list:
     
 # %% visualize
 
-    # o3d.visualization.draw([pcd_vox])
+    o3d.visualization.draw_geometries([pcd])
 
 
 # %% save
