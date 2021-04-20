@@ -221,7 +221,7 @@ virtual_object, virtual_axis, virtual_xyz, virtual_rot = generate_cad_model_to_s
 for i in range(len(virtual_xyz)):
     print("[RESULT] object position: ",virtual_xyz[i], ", object rotation(deg): ", virtual_rot[i])
 
-o3d.visualization.draw_geometries([object_cloud]+virtual_object+object_list)
+o3d.visualization.draw_geometries([object_cloud]+virtual_axis+object_list)
 
 # %%
 
